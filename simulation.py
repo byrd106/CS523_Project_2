@@ -1,78 +1,91 @@
 import copy
-
 import random
 from random import randint
 import math
-# class Simulation: 
-
-# 	runNumber = 10
-
-# 	def runSim(self,sim):
-# 		for i in range(0,self.runNumber):
-# 			sim.mutate();
-# 			sim.printResult(); 
+from subprocess import Popen, PIPE
+from genome import DNASet
 
 
 
-# class Genome:
+
+#from subprocess import Popen, PIPE
+#
+## gamesize = '200'
+#
+#
+## p = Popen(['./pmars', 'A', '/home/ubuntu/testFolder/WilkiesBench/PSWING.RED', '-b', '-r', gamesize], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+## output, err = p.communicate(b"input data that is passed to subprocess' stdin")
+## rc = p.returncode
+#
+## score = int(filter(str.isdigit,output.splitlines()[0]))
+#
+## print(score)
+
+
+
+def fitness(pathToFirstWarrior):
+    pathToPmars = './../pmars'
+    pathToTestWarrior = '/home/goosegoosegoose/testFolder/WilkiesBench/PSWING.RED'
+    gamesize = '200'
+    p = Popen(
+              [
+               pathToPmars,
+               pathToFirstWarrior,
+               pathToTestWarrior  , '-b', '-r',
+               gamesize
+    ], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    output, err = p.communicate(b"input data that is passed to subprocess' stdin")
+
+    # print("here is the output")
+    # print(output)
+    # print(" ---- ---- ")
+
+    p.wait()
 	
-# 	dataSet = [1,2,1,0]		
+    score = output.splitlines()[0].split()[len(output.splitlines()[0].split())-1] 
 
-# 	def mutate(self):
-# 		for index,number in enumerate(self.dataSet):
-# 			self.dataSet[index] = number
-# 			self.dataSet[index] = 2000
-# 			#print(index,number)
-# 			#self.dataSet[index] = 2			
-
-# 	def printResult(self):
-# 		for number in self.dataSet:
-# 			print(number)
+    return copy.copy(score)
 
 
-# sim = Simulation()
-# sim.runSim(Genome())
-# we basicall
-
-def fitness(computerNumber):
-	return math.fabs(computerNumber - 32)
-	
 
 def mutate(producer):
-	randomVal = random.uniform(0, 1)
-	if(randomVal < 0.50):
-		producer.number = producer.number - randint(0,30)
-	if(randomVal >= 0.50):
-		producer.number = producer.number + randint(0,30)	
+#	randomVal = random.uniform(0, 1)
+#	if(randomVal < 0.50):
+#		producer.number = producer.number - randint(0,30)
+#	if(randomVal >= 0.50):
+#		producer.number = producer.number + randint(0,30)	
 
-	
+    return producer
 
 
 def tournamentSelection(population):
 
 	finalpop = [] 
 
+#    print("poplength")
+        
+#    print(len(population))
+
 	for index in range(0,len(population)):			
 		finalpop.append(population[index]) 
 		
 
-	print("======init POP here ======") 		
+	#print("======init POP here ======") 		
 
 	# for producer in population:
 	# 		print(producer.numberComputers()) 
 
-	print("======TA starting ======") 				
+	#print("======TA starting ======") 				
 
 	for number in range(0,len(population)):		
+
 		indexOne = randint(0,len(population)-1)
 		indexTwo = randint(0,len(population)-1)
 
-		fitnessOne = fitness(population[indexOne].numberComputers())
-		fitnessTwo = fitness(population[indexTwo].numberComputers())
 
-		# for producer in population:
-		# 	print(producer.numberComputers()) 
-	
+		fitnessOne = fitness(population[indexOne].fitnessURL())
+		fitnessTwo = fitness(population[indexTwo].fitnessURL())
+
 		if(fitnessOne < fitnessTwo):
 			finalpop[indexTwo] = copy.copy(population[indexOne])
 			#population[indexTwo] = population[indexOne]
@@ -81,51 +94,47 @@ def tournamentSelection(population):
 			finalpop[indexOne] = copy.copy(population[indexOne])
 			#population[indexOne] = population[indexTwo]		
 
-	print("======TA over, result:: ======") 			
+		randomSeed = random.uniform(0, 1)
+		
+		if randomSeed < 0.1:
+			finalpop[indexOne].mutate()						
+
+
+	#print("======TA over, result:: ======") 			
+
 
 	# for producer in finalpop:
 	# 	print(producer.numberComputers()) 
 
 	return finalpop
 
-class Producer: 
-
-	number = 1000
-
-	def numberComputers(self):
-		return self.number
 
 
 
-pop = [Producer(),Producer(),Producer(),Producer(),Producer(),Producer(),Producer(),Producer(),Producer(),Producer()]
+popsize = 15
 
-simNumber = 300
+pop = []
+
+for number in range(0,popsize):
+	dnaSet = DNASet()
+	dnaSet.start()
+	pop.append(dnaSet)
+
+
+simNumber = 10
+
+print("firstout")
+pop[0].outputData()
+print("eee")
 
 for number in range(0,simNumber):
 		
-		# print(fitness(producer.numberComputers()))
-
 	pop = tournamentSelection(pop)
 
-	print("======start mutate ======") 
-	for producer in pop:
-		randomVal = random.uniform(0, 1)
+	print(" new round ") 
 
-		if(randomVal < 0.10):
-			mutate(producer)
-	print("======mutated result:======") 
-	for producer in pop:
-		print(producer.numberComputers()) 
-	print("======mutated end======") 
+print(pop[0].fitnessURL())
+print(fitness(pop[0].fitnessURL()))
 
 
 
-	#for producer in pop:
-		#print(producer.numberComputers()) 
-
-	print("======round over ======") 
-
-
-# cat = Cat("tes"); 
-# cat.meow(); 
-# cat.bark(); 
