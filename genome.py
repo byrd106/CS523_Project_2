@@ -13,11 +13,18 @@ class DNASet:
         size = 2
         
         def start(self):
-            for line in range(0,self.getSize()):
+            self.size = 1
+            self.DNA = []
+            for line in range(0,1):
                 dna = DNALine()
                 dna.buildDefault()
                 self.DNA.append(dna)
             self.writeFile()
+
+        def newSeed(self):
+            self.seed = random.randint(0,90000)
+            self.writeFile()
+
 
         def __init__(self):
             
@@ -39,18 +46,23 @@ class DNASet:
                 self.DNA.append(DNALine())
 
             if(randomVal < 0.50 and randomVal < 0.25):
-                randomLine = randint(0,self.getSize()-1) 
-                            
-                newDNA = [] 
                 
-                for i,item in enumerate(self.DNA):
-                    if i != randomLine:
-                        newDNA.append(item)
-                
-                self.DNA = newDNA
+                # the DNA must be greater than one to remove a line 
+                if self.getSize() > 1:
+                    randomLine = randint(0,self.getSize()-1) 
+                                
+                    newDNA = [] 
+                    
+                    for i,item in enumerate(self.DNA):
+                        if i != randomLine:
+                            newDNA.append(item)
+                    
+                    self.DNA = newDNA
 
             if(randomVal > 0.50):
-                randomLine = randint(0,self.getSize()-1) 
+                randomLine = randint(0,len(self.DNA)-1)
+                print(randomLine,self.getSize()-1)
+
                 self.DNA[randomLine].basicMutate()   
 
             self.writeFile()                    
@@ -97,9 +109,10 @@ class DNASet:
 class DNALine:
     
         #instructionSet = ["DAT","MOV","ADD","SUB","MUL","DIV","MOD","JMP","JMZ","DJN","SPL","CMP","SEQ","SNE","SLT","LDP","STP","NOP"]
-        instructionSet = ["DAT","MOV","ADD"]
-        operatorSet = ["#","$","@","<","*","{","}",""]
-        dictionaryData = {'DAT': 2, 'MOV': 2, 'ADD': 2}
+        instructionSet = ["DAT","MOV","ADD","MUL","DIV","JMP","SNE","SEQ"]
+        #"#","$","@","<","*","{","}",
+        operatorSet = [""]
+        dictionaryData = {'DAT': 2, 'MOV': 2, 'ADD': 2, 'MUL': 2, 'DIV': 2, 'JMP': 1, 'SNE':2, 'SEQ':2}
         
         code = ""
         
