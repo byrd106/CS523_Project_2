@@ -73,6 +73,10 @@ def fitness(pathToFirstWarrior,pathToSecond = 0,gamesize = '1'):
 	
 	print("game was played")
 	
+	# if(len(output.splitlines()[0].split()) < len(output.splitlines()[0].split())-1):
+	# 	print("WARNING LENth")
+	# 	print(output)
+
 	score = output.splitlines()[0].split()[len(output.splitlines()[0].split())-1] 
 
 	#time.sleep(0.3) 
@@ -159,9 +163,7 @@ def tournamentSelection(population):
 
 		if(fitnessTwo < fitnessOne):			
 			finalpop[indexTwo] = copy.deepcopy(population[indexOne])
-			finalpop[indexTwo].newSeed()
-
-		printTheFitness(finalpop)
+			finalpop[indexTwo].newSeed()		
 
 	return finalpop
 
@@ -179,7 +181,7 @@ for number in range(0,popsize):
 	pop.append(dnaSet)	
 
 
-simNumber = 2000
+simNumber = 10000
 
 printBreak()
 startVal = printTheFitness(pop) 
@@ -187,14 +189,14 @@ printBreak()
 
 for number in range(0,simNumber):
 			
-
-	printTheFitness(pop)		
+	if(number % 100 == 0):
+		printTheFitness(pop)
+		print(number," - new round ") 
+		printBreak()				
 	
 	pop = mutate(tournamentSelection(pop))
 
-	print(number," - new round ") 
-
-	printBreak()
+	
 
 
 endVal = printTheFitness(pop)
