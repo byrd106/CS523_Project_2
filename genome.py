@@ -1,6 +1,11 @@
+import copy
 import random
+import time
 from random import randint
+from subprocess import Popen, PIPE
 
+def printBreak():
+    print("------------------------------------------------")
 
 class DNASet:
     
@@ -11,7 +16,44 @@ class DNASet:
         seed = ""
 
         size = 2
+
+        fitness = 0
+
+        fitnessIsSet = 0
+
+        def getFitness(self):
+            if(self.fitnessIsSet == 0):
+                self.fitnessIsSet = 1 
+                self.setFitness()
+
+            return self.fitness
+
         
+        def setFitness(self):
+            self.fitness = self.calculateFitness()
+
+        def calculateFitness(self):            
+            
+            pathToTestWarrior = '/home/goosegoosegoose/testFolder/WilkiesBench/TORNADO.RED'
+
+            gamesize = '20'
+
+            pathToPmars = './../pmars'
+
+            p = Popen(
+                [
+                pathToPmars,
+                self.fitnessURL(),
+                pathToTestWarrior  , '-b', '-r',
+                gamesize
+            ], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            output, err = p.communicate(b"input data that is passed to subprocess' stdin")
+            
+            score = output.splitlines()[0].split()[len(output.splitlines()[0].split())-1] 
+
+            return int(copy.copy(score))     
+
+
         def start(self):
             self.size = 1
             self.DNA = []
@@ -28,10 +70,19 @@ class DNASet:
 
         def __init__(self):
             
+            self.DNA = []
+
+            self.fitness = 0
+
+            self.fitnessIsSet = 0
+
             self.seed = random.randint(0,90000)
 
+            self.size = random.randint(1,20)
+
             for line in range(0,self.getSize()):
-                self.DNA.append(DNALine())
+                newdna = DNALine()
+                self.DNA.append(newdna)
 
             self.writeFile()
         
@@ -42,8 +93,9 @@ class DNASet:
             randomVal = random.uniform(0, 1)
 
             if(randomVal < 0.50 and randomVal > 0.25):
-                self.size = self.size + 1 
-                self.DNA.append(DNALine())
+                if self.getSize() < 90: #max size
+                    self.size = self.size + 1 
+                    self.DNA.append(DNALine())
 
             if(randomVal < 0.50 and randomVal < 0.25):
                 
@@ -60,14 +112,16 @@ class DNASet:
                     self.DNA = newDNA
 
             if(randomVal > 0.50):
-                randomLine = randint(0,len(self.DNA)-1)
-                print(randomLine,self.getSize()-1)
-
-                self.DNA[randomLine].basicMutate()   
-
-            self.writeFile()                    
+                
+                if len(self.DNA)-1 > 0:
+                    randomLine = randint(0,len(self.DNA)-1)
+                    self.DNA[randomLine].basicMutate()   
+            
+            self.writeFile()  
+            self.setFitness()                  
 
         def outputData(self):
+            print(self.seed,self.DNA)
             for dnaLine in self.DNA:
                 print(dnaLine.code)
         
@@ -109,10 +163,11 @@ class DNASet:
 class DNALine:
     
         #instructionSet = ["DAT","MOV","ADD","SUB","MUL","DIV","MOD","JMP","JMZ","DJN","SPL","CMP","SEQ","SNE","SLT","LDP","STP","NOP"]
-        instructionSet = ["DAT","MOV","ADD","MUL","DIV","JMP","SNE","SEQ"]
+        instructionSet = ["DAT","MOV","ADD","MUL","DIV","JMP","SNE","SEQ","SLT","SNE"]
         #"#","$","@","<","*","{","}",
-        operatorSet = [""]
-        dictionaryData = {'DAT': 2, 'MOV': 2, 'ADD': 2, 'MUL': 2, 'DIV': 2, 'JMP': 1, 'SNE':2, 'SEQ':2}
+        #NOP':0, 
+        operatorSet = ["#","$","@","<","*","{","}"]
+        dictionaryData = {'DAT': 2, 'MOV': 2, 'ADD': 2, 'MUL': 2, 'DIV': 2, 'JMP': 1, 'SNE':2, 'SEQ':2, 'SLT':2, 'SNE':2}
         
         code = ""
         
@@ -122,6 +177,7 @@ class DNALine:
 
         def __init__(self):
             self.build()
+            memorySet = []
 
         def buildDefault(self):
             self.instruction = "MOV"
@@ -164,7 +220,7 @@ class DNALine:
         def getRandomMemorySet(self,instructionChoice):
             # choose a random value here , 0 , 1 , 2 , or 3
             
-            memSize = 100
+            memSize = 1
                 
             results = []
             
@@ -204,5 +260,8 @@ def combine(instruction,memory):
             line = line+", "+item.getCell()
 
     return line+";"
+
+
+
 
 
