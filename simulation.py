@@ -49,7 +49,7 @@ def fitness(pathToFirstWarrior,pathToSecond = 0,gamesize = '1'):
 	print("calling fitness")
 
 	if pathToSecond == 0:
-		pathToTestWarrior = '/home/goosegoosegoose/testFolder/WilkiesBench/TORNADO.RED'
+		pathToTestWarrior = '/home/goosegoosegoose/testFolder/WilkiesBench/PSWING.RED'
 		# pathToTestWarrior = '/home/goosegoosegoose/testFolder/A'
 	else:
 		pathToTestWarrior = pathToSecond
@@ -170,7 +170,7 @@ def tournamentSelection(population):
 
 
 
-popsize = 20
+popsize = 40
 
 pop = []
 
@@ -181,7 +181,7 @@ for number in range(0,popsize):
 	pop.append(dnaSet)	
 
 
-simNumber = 10000
+simNumber = 1000
 
 printBreak()
 startVal = printTheFitness(pop) 
@@ -189,10 +189,14 @@ printBreak()
 
 for number in range(0,simNumber):
 			
-	if(number % 100 == 0):
-		printTheFitness(pop)
-		print(number," - new round ") 
-		printBreak()				
+	#if(number % 100 == 0):
+		# for item in pop:
+		# 	item.setFitness()
+	printTheFitness(pop)
+	print(number," - new round ") 
+	printBreak()	
+
+
 	
 	pop = mutate(tournamentSelection(pop))
 

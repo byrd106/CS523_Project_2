@@ -22,6 +22,9 @@ class DNASet:
         fitnessIsSet = 0
 
         def getFitness(self):
+
+            #self.setFitness()
+
             if(self.fitnessIsSet == 0):
                 self.fitnessIsSet = 1 
                 self.setFitness()
@@ -34,9 +37,9 @@ class DNASet:
 
         def calculateFitness(self):            
             
-            pathToTestWarrior = '/home/goosegoosegoose/testFolder/WilkiesBench/TORNADO.RED'
+            pathToTestWarrior = '/home/goosegoosegoose/testFolder/WilkiesBench/PSWING.RED'
 
-            gamesize = '20'
+            gamesize = '40'
 
             pathToPmars = './../pmars'
 
