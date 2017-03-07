@@ -35,11 +35,18 @@ class DNASet:
         def setFitness(self):
             self.fitness = self.calculateFitness()
 
+        def forceFitness(self,value): # for testing
+            self.fitnessIsSet = 1 
+            self.fitness = value
+
         def calculateFitness(self):            
             
-            pathToTestWarrior = '/home/goosegoosegoose/testFolder/WilkiesBench/PSWING.RED'
+            #BLUEFUNK.RED  CANNON.RED  FSTORM.RED  IRONGATE.RED  MARCIA13.RED  NOBODY.RED  PAPERONE.RED  PSWING.RED  RAVE.RED  THERMITE.RED  TIME.RED  TORNADO.RED
+            bench = ["PSWING","FSTORM","CANNON","NOBODY","MARCIA13","PAPERONE","RAVE","TIME","TORNADO","IRONGATE","BLUEFUNK"]
 
-            gamesize = '40'
+            pathToTestWarrior = '../WilkiesBench/' + random.choice(bench) + ".RED"
+
+            gamesize = '10'
 
             pathToPmars = './../pmars'
 
@@ -81,7 +88,8 @@ class DNASet:
 
             self.seed = random.randint(0,90000)
 
-            self.size = random.randint(1,20)
+            self.size = 4
+            #random.randint(1,20)
 
             for line in range(0,self.getSize()):
                 newdna = DNALine()
@@ -128,6 +136,51 @@ class DNASet:
             for dnaLine in self.DNA:
                 print(dnaLine.code)
         
+
+        def attachTop(self,DNA):
+            self.DNA = DNA + self.DNA 
+            self.writeFile()
+
+        def attachBottom(self,DNA):
+            self.DNA = self.DNA + DNA
+            self.writeFile()
+
+
+
+        def chopDNABottom(self,numLines):
+
+            if(numLines < len(self.DNA)):
+
+                newLength = len(self.DNA)
+
+                firstSet = self.DNA[0:numLines]
+
+                self.DNA = self.DNA[0:(newLength - numLines)]
+
+                self.writeFile()
+
+                return firstSet
+
+            else:
+                return []    
+
+
+        def chopDNATop(self,numLines):
+
+            if numLines < len(self.DNA):
+
+                firstSet = self.DNA[0:numLines]
+
+                self.DNA = self.DNA[numLines:len(self.DNA)]
+
+                self.writeFile()
+
+                return firstSet
+
+            else:
+                return []
+
+
         def getSize(self):
             #return randint(1,20)
             return self.size
@@ -166,11 +219,11 @@ class DNASet:
 class DNALine:
     
         #instructionSet = ["DAT","MOV","ADD","SUB","MUL","DIV","MOD","JMP","JMZ","DJN","SPL","CMP","SEQ","SNE","SLT","LDP","STP","NOP"]
-        instructionSet = ["DAT","MOV","ADD","MUL","DIV","JMP","SNE","SEQ","SLT","SNE"]
+        instructionSet = ["DAT","MOV","ADD","SUB","MUL","DIV","MOD","JMP","JMZ","DJN","SPL","SNE","SEQ","SLT","SNE","LDP","STP"]
         #"#","$","@","<","*","{","}",
         #NOP':0, 
         operatorSet = ["#","$","@","<","*","{","}"]
-        dictionaryData = {'DAT': 2, 'MOV': 2, 'ADD': 2, 'MUL': 2, 'DIV': 2, 'JMP': 1, 'SNE':2, 'SEQ':2, 'SLT':2, 'SNE':2}
+        dictionaryData = {'DAT': 2, 'MOV': 2, 'ADD': 2, 'SUB':2 ,'MOD':2, 'MUL': 2, 'DIV': 2, 'JMP': 1,'JMZ': 2, 'JMN': 1,'DJN': 2,'SPL':1,'CMP':2, 'SNE':2, 'SEQ':2, 'SLT':2, 'LDP':2, 'STP':2 }
         
         code = ""
         
@@ -265,6 +318,45 @@ def combine(instruction,memory):
     return line+";"
 
 
+def crossover(A,B):
+    
+    pivotForA = random.choice(range(1,len(A.DNA)))
+    
+    pivotForB = random.choice(range(1,len(B.DNA)))
+
+    BDNA = A.chopDNATop(2)
+
+    ADNA = B.chopDNABottom(2)
+
+    B.attachBottom(BDNA)
+
+    A.attachTop(ADNA)
+
+# a = DNASet()
+
+# b = DNASet()
 
 
+# a.outputData()
 
+# b.outputData()
+
+# crossover(a,b)
+
+# a.outputData()
+
+# b.outputData()
+
+
+# b = DNASet()
+
+# b.outputData()
+
+# print(a.fitnessURL())
+
+# crossover(a,b)
+# a.outputData()
+# b.outputData()
+
+
+#crossover(a,b)

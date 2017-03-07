@@ -6,6 +6,8 @@ from subprocess import Popen, PIPE
 from genome import DNASet
 import time 
 
+from multiprocessing.dummy import Pool as ThreadPool
+
 def average(thelist):
 	return sum(thelist, 0.0) / len(thelist)
 
@@ -23,7 +25,8 @@ def printUrls(pop):
 	for item in pop:
 		fitnessResultUrls.append(item.fitnessURL())	
 
-	print(fitnessResultUrls)	
+	print(fitnessResultUrls)
+	
 
 def printTheFitness(population):
 	fitnessResult = [] 
@@ -34,12 +37,6 @@ def printTheFitness(population):
 		fitnessResult.append(population[number].getFitness())
 		fitnessResultUrls.append(population[number].fitnessURL())
 		
-		
-		#population[number].outputData()
-		
-		#print("gets a fitness of",fitness(population[number].fitnessURL()))
-		#print("url",population[number].fitnessURL())
-		#print(" ------ -------- ------ ")
 	print(average(fitnessResult),max(fitnessResult),fitnessResult,fitnessResultUrls)
 
 	return max(fitnessResult)
@@ -98,48 +95,81 @@ def mutate(pop):
 	return pop
 
 
-def splitSelection(population):
 
-	splitSize = len(population) / 3 
+def randomInsert(warrior,pop):
+	index = random.choice(range(0,len(pop)))
+	pop[index] = copy.deepcopy(warrior)
+	pop[index].newSeed()
 
-	addCount = 0
+	#copy.deepcopy(population[indexTwo])
+	#finalpop[indexOne].newSeed()
+	return pop 
 
-	fitnessResult = [] 
-	fitnessResultUrls = []	
 
-	for number in range(0,len(population)):		
-		fitnessResult.append(fitness(population[number].fitnessURL()))
-		fitnessResultUrls.append(population[number].fitnessURL())
+def getSlice(population,numberToSelect,reverseValue):
 	
+	bestPerformers = []
 
-	minFit = min(fitnessResult)
-	maxFit = max(fitnessResult)
+	# copy the top three, and randomly insert them into the pop after selection and mutation
+	newlist = sorted(population, key=lambda x: x.getFitness(), reverse=reverseValue)
+	
+	for i in range(0,numberToSelect):
+		bestPerformers.append(newlist[i])
 
-	cloneMax = ""
+	return bestPerformers
 
-	if minFit == maxFit:
-		return population
 
-	for i,item in enumerate(population):
-		if addCount < splitSize and fitnessResult[i] == minFit:
-			population.remove(item)
-			addCount = addCount + 1 
-		if fitnessResult[i] == maxFit:
-			cloneMax = population[i]			
+def getWorstPerformers(population,numberToSelect):
+	return getSlice(population,numberToSelect,False)
 
-	for value in range(0,addCount):
-		newWarrior = copy.deepcopy(cloneMax)
-		newWarrior.newSeed()
-		population.append(newWarrior)		
+def getTopPerformers(population,numberToSelect):
+	return getSlice(population,numberToSelect,True)
 
-	fitnessResult = [] 
-	fitnessResultUrls = []	
 
-	for number in range(0,len(population)):		
-		fitnessResult.append(fitness(population[number].fitnessURL()))
-		fitnessResultUrls.append(population[number].fitnessURL())
+#selection operators::
+def randomReplaceSelection(population):
 
-	return population
+	if len(population) % 2 == 0:
+		split = len(population)/2
+
+	else:
+		split = (len(population) - 1 )/ 2
+
+	top = getTopPerformers(population,split)
+
+	bottom = getWorstPerformers(population,split)
+
+	for i in range(0,len(bottom)-1):
+		
+		randomValue = random.choice(top)
+		bottom[i] = copy.deepcopy(randomValue)
+		bottom[i].newSeed()
+
+	return top + bottom
+
+
+def rouletteSelection(pop):
+	
+	fitnessValues = []
+	
+	finalValues = []
+
+	for i in pop:
+		fitnessValues.append(i.getFitness())
+
+	fitnessSum = sum(fitnessValues)
+
+
+	for i in pop:
+		value = random.choice(range(0,fitnessSum))
+		itemSum = 0
+		for k in pop:
+			itemSum = itemSum + k.getFitness()
+			if(itemSum > value):
+				finalValues.append(k)
+				break;
+
+	return finalValues
 
 def tournamentSelection(population):
 
@@ -169,41 +199,119 @@ def tournamentSelection(population):
 
 
 
+def island(popsize,simNumber,pop = 0):
 
-popsize = 40
+	etism = True
+	esize = 3
 
-pop = []
+	if pop == 0:		
+		pop = []
 
-for number in range(0,popsize):
-	dnaSet = DNASet()	
-	#if number == 0:
-		#dnaSet.start()
-	pop.append(dnaSet)	
+	for number in range(0,popsize):
+		dnaSet = DNASet()	
+		#if number == 0:
+			#dnaSet.start()
+		pop.append(dnaSet)	
+
+	printBreak()
+	startVal = printTheFitness(pop) 
+	printBreak()
+
+	for number in range(0,simNumber):
+				
+		if(number % 100 == 0):
+			for item in pop:
+				item.setFitness()
+				
 
 
-simNumber = 1000
+		#if(number % 100 == 0):
+		#printTheFitness(pop)
+		#print(number," - new round ") 
+		#printBreak()	
+
+		if etism:
+			elites = getTopPerformers(pop,esize)
+		
+
+		#pop = mutate(randomReplaceSelection(pop))
+
+		pop = mutate(tournamentSelection(pop))
+
+		if etism:
+			for w in elites:
+				randomInsert(w,pop)
+
+	endVal = printTheFitness(pop)
+
+	print("Round Success",(endVal-startVal))
+
+	return pop
+
+
+
+islandNumber = 5
+popsize = 20
+simNumber = 4000
+
+results = []
+for i in range(0,islandNumber):
+	results = results + island(popsize,simNumber)
+
+# data = [0,0]
+# pool = ThreadPool(2)
+# results = pool.map(island,data)
 
 printBreak()
-startVal = printTheFitness(pop) 
+printBreak()
 printBreak()
 
-for number in range(0,simNumber):
-			
-	#if(number % 100 == 0):
-		# for item in pop:
-		# 	item.setFitness()
-	printTheFitness(pop)
-	print(number," - new round ") 
-	printBreak()	
+finalResults = island(len(results),simNumber,results)
+
+printTheFitness(finalResults)
+
+printBreak()
 
 
+# data = []
+# for i in range(0,10):
+# 	dna = DNASet()
+# 	dna.forceFitness(i)
+# 	data.append(dna)
+
+# printTheFitness(data)
 	
-	pop = mutate(tournamentSelection(pop))
+# pop = randomReplaceSelection(data)
 
+# printTheFitness(pop)
+
+
+# data = []
+# for i in range(0,10):
+# 	dna = DNASet()
+# 	dna.forceFitness(i)
+# 	data.append(dna)
+
+
+
+
+# for j in range(0,10):
+# 	data = rouletteSelection(data)
 	
 
+# for i in data:
+# 	print i.getFitness()
 
-endVal = printTheFitness(pop)
+# # data = []
 
-print("Round Success",(endVal-startVal))
+# # for i in range(0,10):
+# # 	data.append(i)
+
+# # rc = random.choice(range(0,sum(data)))
+# # a = []
+
+# # for i in range(0,sum(data)):
+# # 	if i > rc:
+# # 		print(i)
+# # 		break;
 
