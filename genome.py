@@ -7,6 +7,9 @@ from subprocess import Popen, PIPE
 def printBreak():
     print("------------------------------------------------")
 
+
+winningList = []
+
 class DNASet:
     
         DNA = []
@@ -42,26 +45,59 @@ class DNASet:
         def calculateFitness(self):            
             
             #BLUEFUNK.RED  CANNON.RED  FSTORM.RED  IRONGATE.RED  MARCIA13.RED  NOBODY.RED  PAPERONE.RED  PSWING.RED  RAVE.RED  THERMITE.RED  TIME.RED  TORNADO.RED
-            bench = ["PSWING","FSTORM","CANNON","NOBODY","MARCIA13","PAPERONE","RAVE","TIME","TORNADO","IRONGATE","BLUEFUNK"]
-
-            pathToTestWarrior = '../WilkiesBench/' + random.choice(bench) + ".RED"
-
-            gamesize = '10'
-
-            pathToPmars = './../pmars'
-
-            p = Popen(
-                [
-                pathToPmars,
-                self.fitnessURL(),
-                pathToTestWarrior  , '-b', '-r',
-                gamesize
-            ], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            output, err = p.communicate(b"input data that is passed to subprocess' stdin")
             
-            score = output.splitlines()[0].split()[len(output.splitlines()[0].split())-1] 
+            scores = []
 
-            return int(copy.copy(score))     
+            bench = [
+                "PSWING",
+                "FSTORM",
+                "CANNON",
+                "NOBODY",
+                "MARCIA13",
+                "PAPERONE",
+                "RAVE",
+                "TIME",
+                "TORNADO",
+                "IRONGATE",
+                "BLUEFUNK"
+            ]
+
+            
+
+            for warriorName in bench:
+
+                pathToTestWarrior = '../WilkiesBench/' + warriorName + ".RED"
+
+                gamesize = '10'
+
+                pathToPmars = './../pmars'
+
+                p = Popen(
+                    [
+                    pathToPmars,
+                    self.fitnessURL(),
+                    pathToTestWarrior  , '-b', '-r',
+                    gamesize
+                ], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+                
+                output, err = p.communicate(b"input data that is passed to subprocess' stdin")
+
+                if(len(output.splitlines()[0].split()) < len(output.splitlines()[0].split())-1):
+                    print("WARNING LENth")
+                    print(output)
+
+                score = int(output.splitlines()[0].split()[len(output.splitlines()[0].split())-1]) 
+
+                if score > 4:
+                    if warriorName not in winningList:
+                        winningList.append(warriorName)
+                        print(winningList)
+
+                scores.append(score)
+                
+            fscore = float(sum(scores)) / max(len(scores), 1)
+
+            return fscore  
 
 
         def start(self):
@@ -132,18 +168,23 @@ class DNASet:
             self.setFitness()                  
 
         def outputData(self):
-            print(self.seed,self.DNA)
             for dnaLine in self.DNA:
                 print(dnaLine.code)
         
 
         def attachTop(self,DNA):
-            self.DNA = DNA + self.DNA 
-            self.writeFile()
+
+            if (len(self.DNA) + len(DNA)) < 90:
+
+                self.DNA = DNA + self.DNA 
+                self.writeFile()
 
         def attachBottom(self,DNA):
-            self.DNA = self.DNA + DNA
-            self.writeFile()
+            
+            if (len(self.DNA) + len(DNA)) < 90:
+
+                self.DNA = self.DNA + DNA
+                self.writeFile()
 
 
 
@@ -151,11 +192,11 @@ class DNASet:
 
             if(numLines < len(self.DNA)):
 
-                newLength = len(self.DNA)
+                dnaLength = len(self.DNA)
 
-                firstSet = self.DNA[0:numLines]
+                firstSet = self.DNA[numLines:dnaLength]
 
-                self.DNA = self.DNA[0:(newLength - numLines)]
+                self.DNA = self.DNA[0:(dnaLength - numLines)]
 
                 self.writeFile()
 
@@ -317,33 +358,41 @@ def combine(instruction,memory):
 
     return line+";"
 
-
 def crossover(A,B):
-    
-    pivotForA = random.choice(range(1,len(A.DNA)))
-    
-    pivotForB = random.choice(range(1,len(B.DNA)))
 
-    BDNA = A.chopDNATop(2)
+    if (len(A.DNA) > 1 and len(B.DNA) > 1 ):
 
-    ADNA = B.chopDNABottom(2)
+        pivotForA = random.choice(range(1,len(A.DNA)))
+        
+        pivotForB = random.choice(range(1,len(B.DNA)))
 
-    B.attachBottom(BDNA)
+        BDNA = A.chopDNABottom(2)
 
-    A.attachTop(ADNA)
+        ADNA = B.chopDNABottom(2)
 
-# a = DNASet()
+        B.attachBottom(BDNA)
 
-# b = DNASet()
+        A.attachBottom(ADNA)
+
 
 
 # a.outputData()
 
+# a.getFitness()
+
+# a.start()
+
+# printBreak()
+
 # b.outputData()
+
+# printBreak()
 
 # crossover(a,b)
 
 # a.outputData()
+
+# printBreak()
 
 # b.outputData()
 
