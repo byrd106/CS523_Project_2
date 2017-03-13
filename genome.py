@@ -8,6 +8,9 @@ def printBreak():
     print("------------------------------------------------")
 
 
+def average(thelist):
+    return sum(thelist, 0.0) / len(thelist)
+
 winningList = []
 
 class DNASet:
@@ -36,11 +39,19 @@ class DNASet:
 
         
         def setFitness(self):
+ 
+            fitnessSet = []
+            
+            for i in range(0,1):
+                fitnessSet.append(self.calculateFitness())
+
+            #print("one warrior",average(fitnessSet))
+ 
             self.fitness = self.calculateFitness()
 
         def forceFitness(self,value): # for testing
             self.fitnessIsSet = 1 
-            self.fitness = value
+            self.fitness = value + 0.01
 
         def calculateFitness(self):            
             
@@ -48,29 +59,29 @@ class DNASet:
             
             scores = []
 
+            # bench = [
+            #     "PSWING",
+            #     "FSTORM",
+            #     "CANNON",
+            #     "NOBODY",
+            #     "MARCIA13",
+            #     "PAPERONE",
+            #     "RAVE",
+            #     "TIME",
+            #     "TORNADO",
+            #     "IRONGATE",
+            #     "BLUEFUNK"
+            # ]
             bench = [
-                "PSWING",
-                "FSTORM",
-                "CANNON",
-                "NOBODY",
-                "MARCIA13",
-                "PAPERONE",
-                "RAVE",
-                "TIME",
-                "TORNADO",
-                "IRONGATE",
-                "BLUEFUNK"
+                "PAPERONE"
             ]
-
-            
-
             for warriorName in bench:
 
-                pathToTestWarrior = '../WilkiesBench/' + warriorName + ".RED"
+                pathToTestWarrior = 'WilkiesBench/' + warriorName + ".RED"
 
                 gamesize = '10'
 
-                pathToPmars = './../pmars'
+                pathToPmars = './pmars'
 
                 p = Popen(
                     [
@@ -91,7 +102,7 @@ class DNASet:
                 if score > 4:
                     if warriorName not in winningList:
                         winningList.append(warriorName)
-                        print(winningList)
+                        #print(winningList)
 
                 scores.append(score)
                 
@@ -124,7 +135,7 @@ class DNASet:
 
             self.seed = random.randint(0,90000)
 
-            self.size = 4
+            self.size = random.randint(1,90)
             #random.randint(1,20)
 
             for line in range(0,self.getSize()):
@@ -375,6 +386,12 @@ def crossover(A,B):
         A.attachBottom(ADNA)
 
 
+
+# a = DNASet()
+# a.start()
+# for i in range(0,25):
+#     a.setFitness()
+#     print(a.getFitness())
 
 # a.outputData()
 
